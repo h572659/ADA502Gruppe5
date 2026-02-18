@@ -1,0 +1,11 @@
+import unittest
+
+class TestMETHarvest(unittest.TestCase):
+
+# ALL tests must start with "test_" for unittest to detect it as a test. 
+
+    def test_hello_world(self):
+        self.assertEqual("Hello world", "Hello world")
+
+if __name__ == '__main__':
+    unittest.main()
