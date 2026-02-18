@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Header, HTTPException
 import os
 from met_service import fetch_weather
+from frcm_service import calculate_fire_risk
 
 
 app = FastAPI()
@@ -24,3 +25,14 @@ def met(
 ):
     require_api_key(x_api_key)
     return fetch_weather(lat, lon)
+
+@app.get("/risk")
+def risk(
+    lat: float,
+    lon: float,
+    x_api_key: str | None = Header(default=None, alias="X-API-KEY")
+):
+    require_api_key(x_api_key)
+    met_json = fetch_weather(lat, lon)
+    result = calculate_fire_risk(met_json)
+    return {"lat": lat, "lon": lon, "frcm_result": result}
