@@ -5,4 +5,4 @@ def fetch_weather(lat: float, lon: float):
     headers = {"User-Agent": "ADA502Gruppe5/1.0 (student project)"}
     r = requests.get(url, headers=headers, timeout=20)
     r.raise_for_status()
-    return r.json()
+    return r
