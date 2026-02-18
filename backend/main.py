@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Header, HTTPException
 import os
+from met_service import fetch_weather
+
 
 app = FastAPI()
 
@@ -13,3 +15,12 @@ def require_api_key(x_api_key: str | None):
 def read_root(x_api_key: str | None = Header(default=None, alias="X-API-KEY")):
     require_api_key(x_api_key)
     return {"message": "Fire risk API is running (secured)"}
+
+@app.get("/met")
+def met(
+    lat: float,
+    lon: float,
+    x_api_key: str | None = Header(default=None, alias="X-API-KEY")
+):
+    require_api_key(x_api_key)
+    return fetch_weather(lat, lon)
