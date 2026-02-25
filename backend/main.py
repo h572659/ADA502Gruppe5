@@ -4,7 +4,9 @@ from met_service import fetch_weather
 from frcm_service import calculate_fire_risk
 
 
+
 app = FastAPI()
+
 
 API_KEY = os.getenv("API_KEY", "superhemmelig")
 
