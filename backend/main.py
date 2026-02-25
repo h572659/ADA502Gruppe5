@@ -24,9 +24,7 @@ def met(
     x_api_key: str | None = Header(default=None, alias="X-API-KEY")
 ):
     require_api_key(x_api_key)
-    met_response = fetch_weather(lat, lon)
-    return met_response.json()
-
+    return fetch_weather(lat, lon)
 
 @app.get("/risk")
 def risk(
@@ -35,9 +33,6 @@ def risk(
     x_api_key: str | None = Header(default=None, alias="X-API-KEY")
 ):
     require_api_key(x_api_key)
-    met_response = fetch_weather(lat, lon)
-    met_json = met_response.json()
+    met_json = fetch_weather(lat, lon)
     result = calculate_fire_risk(met_json)
     return {"lat": lat, "lon": lon, "frcm_result": result}
-
-
