@@ -46,7 +46,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.129.0" },
-    { name = "frcm", path = "../lib/frcm-0.1.0-py3-none-any.whl" },
+    { name = "frcm", path = "lib/frcm-0.1.0-py3-none-any.whl" },
     { name = "requests", specifier = ">=2.32.5" },
     { name = "uvicorn", specifier = ">=0.41.0" },
 ]
@@ -125,7 +125,7 @@ wheels = [
 [[package]]
 name = "frcm"
 version = "0.1.0"
-source = { path = "../lib/frcm-0.1.0-py3-none-any.whl" }
+source = { path = "lib/frcm-0.1.0-py3-none-any.whl" }
 dependencies = [
     { name = "numpy" },
     { name = "pydantic" },

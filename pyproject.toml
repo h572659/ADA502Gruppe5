@@ -12,4 +12,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-frcm = { path = "../lib/frcm-0.1.0-py3-none-any.whl" }
+frcm = { path = "lib/frcm-0.1.0-py3-none-any.whl" }

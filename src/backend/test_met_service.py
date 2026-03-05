@@ -4,9 +4,11 @@ import unittest
 from unittest.mock import patch, Mock
 
 # Ensure backend root is on sys.path so tests can import met_service
-sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
+#sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 from met_service import fetch_weather
+
+
 def make_mock_response(status=200, json_data=None, raise_exc=None):
     m = Mock()
     m.status_code = status
