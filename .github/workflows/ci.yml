@@ -27,6 +27,6 @@ jobs:
           pip install pytest
 
       - name: Run tests
-        run: |
-          cd src/backend
-          pytest  # Run tests from src/backend (assumes test files are directly there)
+      run: |
+        cd src/backend
+        python -m unittest test_met_service.py
