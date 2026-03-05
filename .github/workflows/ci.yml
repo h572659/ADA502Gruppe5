@@ -13,3 +13,5 @@ jobs:
           name: Runs unit test
         - run: uv run python src/backend/test_METHarvest.py
           name: Runs unit test
+        - run: uv run python src/backend/test_indicator.py
+          name: Runs unit test
