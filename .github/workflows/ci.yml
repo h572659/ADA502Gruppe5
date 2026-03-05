@@ -23,7 +23,7 @@ jobs:
           # Install the local frcm wheel first
           pip install lib/frcm-0.1.0-py3-none-any.whl
           # Install src/backend requirements
-          pip install -r src/backend/requirements.txt
+          pip install -r requirements.txt
           pip install pytest
 
       - name: Run tests
