@@ -27,6 +27,7 @@ jobs:
           pip install pytest
 
       - name: Run tests
-      run: |
-        cd src/backend
-        python -m unittest test_met_service.py
+        run: |
+          cd src/backend
+          python -m unittest test_met_service.py
+          python -m unittest test_METHarvest.py  
