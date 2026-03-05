@@ -15,13 +15,18 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version-file: '.python-version'
+          python-version: '3.14'  # Directly specify version from src/backend/.python-version
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          # Install the local frcm wheel first
+          pip install lib/frcm-0.1.0-py3-none-any.whl
+          # Install src/backend requirements
+          pip install -r src/backend/requirements.txt
           pip install pytest
 
       - name: Run tests
-        run: pytest tests
+        run: |
+          cd src/backend
+          pytest  # Run tests from src/backend (assumes test files are directly there)
