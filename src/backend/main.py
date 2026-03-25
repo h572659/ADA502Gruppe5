@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Header, HTTPException
 import os
-from met_service import fetch_weather
-from frcm_service import calculate_fire_risk
+from .met_service import fetch_weather
+from .frcm_service import calculate_fire_risk
 
 app = FastAPI()
 

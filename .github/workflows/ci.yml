@@ -1,4 +1,4 @@
-name: Python CI
+name: Python CI and CD
 on:
   [push]
 jobs:
@@ -15,3 +15,15 @@ jobs:
           name: Runs unit test
         - run: uv run python src/backend/test_indicator.py
           name: Runs unit test
+        
+        - name: Login to Docker Hub
+          uses: docker/login-action@v4
+          with:
+            username: ${{ secrets.DOCKER_USERNAME }}
+            password: ${{ secrets.DOCKER_PASSWORD }}
+
+        - name: Build image
+          run: docker build -t ${{ secrets.DOCKER_USERNAME }}/ada502:latest .
+
+        - name: Push image
+          run: docker push ${{ secrets.DOCKER_USERNAME }}/ada502:latest

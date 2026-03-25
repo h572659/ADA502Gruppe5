@@ -1,5 +1,5 @@
 class indicator:
-
+    # NOTE: WIP - We may wish to provide different and more nuanced feedback
     def indication(self, ttf):
             if ttf < 5:
                 return "red"
