@@ -7,7 +7,7 @@ https://trello.com/b/juFPn2S1/ada502gruppe5
 http://158.37.66.185/
 
 ## How to update the documentation website (in the future)
-Step 1: Make changes to index.md
+Step 1: Make changes to index.md in the "docs" folder in the "web-docs" folder.
 
 
 Step 2: Use cd to move from project root to web-docs -> "cd web-docs"
@@ -23,3 +23,4 @@ Step 5: Push changes to the repository, hopefully there will soon be an automati
 
 
 Step 6: Test the landing page using the above url.
+https://www.mkdocs.org/getting-started/
