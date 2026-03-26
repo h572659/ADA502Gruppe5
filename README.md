@@ -23,4 +23,6 @@ Step 5: Push changes to the repository, hopefully there will soon be an automati
 
 
 Step 6: Test the landing page using the above url.
+
+
 https://www.mkdocs.org/getting-started/
