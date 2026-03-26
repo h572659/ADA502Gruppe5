@@ -40,7 +40,7 @@ jobs:
             key: ${{ secrets.VM_SSH_KEY }}
             port: ${{ secrets.VM_PORT }}
             script: |
-              docker pull ${{ secrets.DOCKER_NAME }}/ada502:latest
-              docker stop ada502 || true
-              docker rm ada502 || true
-              docker run -d --name ada502 -p 8000:8000 ${{ secrets.DOCKER_NAME }}/ada502:latest
+              sudo docker pull ${{ secrets.DOCKER_NAME }}/ada502:latest
+              sudo docker stop ada502 || true
+              sudo docker rm ada502 || true
+              sudo docker run -d --name ada502 -p 8000:8000 ${{ secrets.DOCKER_NAME }}/ada502:latest
