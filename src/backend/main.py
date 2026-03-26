@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, status, Depends
 import os
 from .met_service import fetch_weather
 from .frcm_service import calculate_fire_risk
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from .auth import get_user_info, verify_user_role, verify_admin_role
 
 app = FastAPI()
 
@@ -39,3 +40,22 @@ def risk(
     met_json = fetch_weather(lat, lon)
     result = calculate_fire_risk(met_json)
     return {"lat": lat, "lon": lon, "frcm_result": result}
+
+@app.get("/api/v1/public", status_code=status.HTTP_200_OK)
+def public_user():
+    return {"message": "This is a public resource for everyone."}
+
+
+@app.get("/api/v1/protected")
+def protected_user(user: bool = Depends(verify_user_role)):
+    return {"message": "This is a protected resource for USER role."}
+
+
+@app.get("/api/v1/admin")
+def protected_admin(admin: bool = Depends(verify_admin_role)):
+    return {"message": "This is a protected resource for ADMIN role."}
+
+
+@app.get("/api/v1/me")
+async def current_user(user = Depends(get_user_info)):
+    return user.model_dump()
