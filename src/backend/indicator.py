@@ -7,4 +7,8 @@ class indicator:
                 return "green"
             else:
                 return "yellow"
+
+
+def indication(ttf):
+    return indicator().indication(ttf)
         

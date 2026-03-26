@@ -22,3 +22,7 @@ services:
       - "8080:8080"
     volumes:
       - ./keycloak/import:/opt/keycloak/data/import
+      - keycloak_data:/opt/keycloak/data
+
+volumes:
+  keycloak_data:

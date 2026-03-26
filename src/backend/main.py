@@ -5,6 +5,7 @@ from .frcm_service import calculate_fire_risk
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from .auth import get_user_info, verify_user_role, verify_admin_role
+from .indicator import indication
 
 app = FastAPI()
 
@@ -21,41 +22,36 @@ app.mount("/static-docs", StaticFiles(directory="/app/web-docs/site", html=True)
 def redirect_to_docs():
     return RedirectResponse(url="/static-docs")
 
-@app.get("/met")
+@app.get("/public/server_status")
+def server_status():
+    return {
+        "Sever status for API, no authentication required": "ok",
+        "status": "ok",
+        "code": status.HTTP_200_OK,
+        "message": "Server is running."
+    }
+
+@app.get("/user/met")
 def met(
     lat: float,
     lon: float,
-    x_api_key: str | None = Header(default=None, alias="X-API-KEY")
+    user: bool = Depends(verify_user_role),
 ):
-    require_api_key(x_api_key)
-    return fetch_weather(lat, lon)
+    return {**fetch_weather(lat, lon).json(), "message": "Weather data collected for users and admins."}
 
-@app.get("/risk")
+@app.get("/user/risk")
 def risk(
     lat: float,
     lon: float,
-    x_api_key: str | None = Header(default=None, alias="X-API-KEY")
+    user: bool = Depends(verify_user_role),
 ):
-    require_api_key(x_api_key)
-    met_json = fetch_weather(lat, lon)
+    met_json = fetch_weather(lat, lon).json()
     result = calculate_fire_risk(met_json)
+    temperature = result.get("air_temperature")
+    if temperature is not None:
+        result["indication"] = indication(temperature)
     return {"lat": lat, "lon": lon, "frcm_result": result}
 
-@app.get("/api/v1/public", status_code=status.HTTP_200_OK)
-def public_user():
-    return {"message": "This is a public resource for everyone."}
-
-
-@app.get("/api/v1/protected")
-def protected_user(user: bool = Depends(verify_user_role)):
-    return {"message": "This is a protected resource for USER role."}
-
-
-@app.get("/api/v1/admin")
-def protected_admin(admin: bool = Depends(verify_admin_role)):
-    return {"message": "This is a protected resource for ADMIN role."}
-
-
-@app.get("/api/v1/me")
-async def current_user(user = Depends(get_user_info)):
-    return user.model_dump()
+@app.get("/admin/only")
+def admin_only(admin: bool = Depends(verify_admin_role)):
+    return {"message": "This endpoint is only accessible for admins."}
