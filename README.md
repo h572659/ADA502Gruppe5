@@ -16,6 +16,9 @@ Step 2: Use cd to move from project root to web-docs -> "cd web-docs"
 Step 3: Build the webpage -> "mkdocs build" (Command must be used in the web-docs folder)
 
 
+### NOTE: You can also make direct changes to the index.html file obviously, in that case skip steps 1-3.
+
+
 Step 4: Check that your changes have been added. Run the docker-compose file and test on localhost:8000 to see changes.
 
 
