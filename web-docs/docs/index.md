@@ -6,6 +6,8 @@ Our [github](https://github.com/h572659/ADA502Gruppe5).
 
 WIP
 
+If you are seeing this, you have managed to set up the CD properly.
+
 ## Project layout
 
     mkdocs.yml    # The configuration file.
