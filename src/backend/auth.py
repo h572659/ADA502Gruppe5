@@ -10,8 +10,8 @@ ROLE_HIERARCHY = {
 }
 
 keycloak_openid = KeycloakOpenID(
-    server_url=config("SERVER_URL", default="http://localhost:8000"),
-    realm_name=config("realm"),
+    server_url=config("SERVER_URL", default="http://keycloak:8080"),
+    realm_name=config("realm", default="ADA_502"),
     client_id=""
 )
 
