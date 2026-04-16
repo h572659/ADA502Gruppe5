@@ -29,3 +29,6 @@ Step 6: Test the landing page using the above url.
 
 
 https://www.mkdocs.org/getting-started/
+
+## MQWorkerService
+https://github.com/h572659/MQWorkerService
