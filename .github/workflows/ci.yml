@@ -49,5 +49,3 @@ jobs:
                 -p 8000:8000 \
                 -p 8080:8080 \
                 ${{ secrets.DOCKER_NAME }}/ada502:latest
-
-              sudo docker run -d --name ada502 -p 8000:8000 -p 8080:8080 ${{ secrets.DOCKER_NAME }}/ada502:latest
