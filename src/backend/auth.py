@@ -1,8 +1,16 @@
 from decouple import config
 from keycloak import KeycloakOpenID
 from fastapi import HTTPException, status, Depends, Request
-
+from fastapi.security import OAuth2AuthorizationCodeBearer
 from .models import User
+
+
+oauth2_scheme = OAuth2AuthorizationCodeBearer(
+    authorizationUrl=("${KC_URL}/realms/ADA_502/protocol/openid-connect/auth"
+                      "?prompt=login"
+    ),
+    tokenUrl="${KC_URL}/realms/ADA_502/protocol/openid-connect/token"
+)
 
 ROLE_HIERARCHY = {
     "admin": {"admin"},
@@ -10,16 +18,17 @@ ROLE_HIERARCHY = {
 }
 
 keycloak_openid = KeycloakOpenID(
-    server_url=config("SERVER_URL", default="http://keycloak:8080"),
+    server_url=config("SERVER_URL", default="${KC_URL}"),
     realm_name=config("realm", default="ADA_502"),
-    client_id=""
+    client_id = "" 
 )
 
 #Get Token 
-def get_jwttoken(req: Request):
-    token = req.headers["Authorization"]
-    token = token.split(" ").pop(1)
-    print(token)
+def get_jwttoken(token: str = Depends(oauth2_scheme)):
+    #token = req.headers["Authorization"]
+    #token = token.split(" ").pop(1)
+    #print(token)
+    #print(f"Mottatt token: {token[:10]}...")
     return token
 
 async def get_idp_public_key():

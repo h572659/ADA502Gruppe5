@@ -4,11 +4,17 @@ from .met_service import fetch_weather
 from .frcm_service import calculate_fire_risk
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from .auth import get_user_info, verify_user_role, verify_admin_role
+from .auth import get_user_info, verify_user_role, verify_admin_role, oauth2_scheme
 from .indicator import indication
 
-app = FastAPI()
-
+app = FastAPI(
+    swagger_ui_init_oauth={
+        "clientId": "${KCLIENT_ID}", 
+        "appName": "ADA_502 API",
+        "usePkceWithAuthorizationCodeGrant": True
+    }
+)
+app.swagger_ui_oauth2_redirect_url = "/docs/oauth2-redirect"
 API_KEY = os.getenv("API_KEY", "superhemmelig")
 
 def require_api_key(x_api_key: str | None):
@@ -31,7 +37,7 @@ def server_status():
         "message": "Server is running."
     }
 
-@app.get("/user/met")
+@app.get("/user/meta")
 def met(
     lat: float,
     lon: float,
