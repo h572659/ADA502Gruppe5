@@ -19,7 +19,7 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     ports:
-      - "8080:8080"
+      - "0.0.0.0:8080:8080"
     volumes:
       - ./keycloak/import:/opt/keycloak/data/import
       - keycloak_data:/opt/keycloak/data
