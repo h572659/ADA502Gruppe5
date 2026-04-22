@@ -29,23 +29,68 @@ jobs:
           run: docker push ${{ secrets.DOCKER_NAME }}/ada502:latest
           
   deploy:
-      runs-on: ubuntu-latest
-      needs: test
-      steps:
-        - name: Deploy to external VM
-          uses: appleboy/ssh-action@v0.1.6
-          with:
-            host: ${{ secrets.VM_HOST }}
-            username: ${{ secrets.VM_USER }}
-            key: ${{ secrets.VM_SSH_KEY }}
-            port: ${{ secrets.VM_PORT }}
-            script: |
-              sudo docker pull ${{ secrets.DOCKER_NAME }}/ada502:latest
-              sudo docker stop ada502 || true
-              sudo docker rm ada502 || true
-              sudo docker run -d \
-                --name ada502 \
-                --network app-network \
-                -p 8000:8000 \
-                -p 8080:8080 \
-                ${{ secrets.DOCKER_NAME }}/ada502:latest
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Deploy to external VM
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT }}
+
+          envs: KEYCLOAK_ADMIN,KEYCLOAK_ADMIN_PASSWORD,DOCKER_NAME
+
+          script: |
+            set -e
+
+            echo "Creating network..."
+            docker network create app-network || true
+
+            echo "Stopping old containers..."
+            docker stop keycloak || true
+            docker rm keycloak || true
+            docker stop ada502 || true
+            docker rm ada502 || true
+
+            # -------------------------
+            # START KEYCLOAK
+            # -------------------------
+            echo "Starting Keycloak..."
+
+            docker run -d \
+              --name keycloak \
+              --network app-network \
+              -p 8080:8080 \
+              -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
+              -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
+              -e KC_HEALTH_ENABLED=true \
+              -v ~/keycloak/import:/opt/keycloak/data/import \
+              quay.io/keycloak/keycloak:26.1 \
+              start-dev --import-realm
+
+            echo "Waiting for Keycloak..."
+            until curl -s http://localhost:8080/health/ready; do
+              sleep 5
+            done
+
+            echo "Keycloak is ready."
+
+            # -------------------------
+            # START API
+            # -------------------------
+            echo "Deploying API..."
+
+            docker pull $DOCKER_NAME/ada502:latest
+
+            docker run -d \
+              --name ada502 \
+              --network app-network \
+              -p 8000:8000 \
+              -e SERVER_URL=http://keycloak:8080/ \
+              -e realm=ADA_502 \
+              $DOCKER_NAME/ada502:latest
+
+            echo "Deployment complete."
