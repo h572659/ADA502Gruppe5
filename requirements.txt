@@ -2,5 +2,6 @@ fastapi
 uvicorn
 requests
 mkdocs
+psycopg
 python-decouple
 python-keycloak
