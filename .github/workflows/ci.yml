@@ -51,20 +51,17 @@ jobs:
             # Fix Docker image reference safely
             # ----------------------------------
             
-              DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
+            DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
             
-            echo "Creating network..."
+            echo "Stopping and cleaning up..."
+            sudo docker stop keycloak ada502 || true
+            sudo docker rm keycloak ada502 || true
+            
+            echo "Ensuring network exists..."
             sudo docker network create app-network || true
 
-            echo "Stopping old containers..."
-            sudo docker stop keycloak || true
-            sudo docker rm keycloak || true
-            sudo docker stop ada502 || true
-            sudo docker rm ada502 || true
-
-            # ----------------------------------
-            # Start Keycloak
-            # ----------------------------------
+            # 2. Start Keycloak - Minimalistisk versjon
+            # Vi fjerner import og volum-mapping helt for å sikre oppstart
             echo "Starting Keycloak..."
             sudo -E docker run -d \
               --name keycloak \
@@ -74,34 +71,20 @@ jobs:
               -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
               -e KC_HTTP_ENABLED=true \
               -e KC_HOSTNAME_STRICT=false \
-              -e KC_HOSTNAME_STRICT_HTTPS=false \
-              -v ~/keycloak/import:/opt/keycloak/data/import \
               quay.io/keycloak/keycloak:26.1 \
-              start-dev --import-realm
+              start-dev
 
-            # ----------------------------------
-            # Proper readiness check
-            # ----------------------------------
-            echo "Waiting for Keycloak..."
-            until curl -s http://localhost:8080/realms/master > /dev/null; do
-              sleep 5
-            done
+            # 3. Vent litt på at Keycloak skal "puste"
+            echo "Giving Keycloak 15 seconds to start..."
+            sleep 15
 
-            echo "Keycloak is ready."
-
-            # ----------------------------------
-            # Deploy API
-            # ----------------------------------
+            # 4. Start API-en din
             echo "Deploying API..."
-
-            DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
-
             sudo -E docker pull $DOCKER_IMAGE
-
             sudo -E docker run -d \
               --name ada502 \
               --network app-network \
               -p 8000:8000 \
-              -e SERVER_URL=http://keycloak:8080/ \
+              -e SERVER_URL=http://keycloak:8080 \
               -e realm=ADA_502 \
               $DOCKER_IMAGE
