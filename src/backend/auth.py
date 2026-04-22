@@ -7,9 +7,14 @@ from .models import User
 
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
     authorizationUrl=("http://158.37.66.185:8080/realms/ADA_502/protocol/openid-connect/auth"
-                      "?prompt=login"
-    ),
+                      "?prompt=login"),
+    
+    #authorizationUrl=("http://localhost:8080/realms/ADA_502/protocol/openid-connect/auth"
+                      #"?prompt=login"),
+    
     tokenUrl="http://158.37.66.185:8080/realms/ADA_502/protocol/openid-connect/token"
+  
+    #tokenUrl="http://localhost:8080/realms/ADA_502/protocol/openid-connect/token"
 )
 
 ROLE_HIERARCHY = {
@@ -18,7 +23,7 @@ ROLE_HIERARCHY = {
 }
 
 keycloak_openid = KeycloakOpenID(
-    server_url=config("SERVER_URL", default="http://158.37.66.185:8080"),
+    server_url=config("SERVER_URL", default="http://keycloak:8080"),
     realm_name=config("realm", default="ADA_502"),
     client_id = "" 
 )
