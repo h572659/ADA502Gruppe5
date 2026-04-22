@@ -72,6 +72,9 @@ jobs:
               -p 8080:8080 \
               -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
               -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
+              -e KC_HTTP_ENABLED=true \
+              -e KC_HOSTNAME_STRICT=false \
+              -e KC_HOSTNAME_STRICT_HTTPS=false \
               -v ~/keycloak/import:/opt/keycloak/data/import \
               quay.io/keycloak/keycloak:26.1 \
               start-dev --import-realm
