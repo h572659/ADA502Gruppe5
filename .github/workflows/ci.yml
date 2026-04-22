@@ -42,16 +42,17 @@ jobs:
           port: ${{ secrets.VM_PORT }}
 
           # Inject GitHub secrets into SSH environment
-          envs: KEYCLOAK_ADMIN,KEYCLOAK_ADMIN_PASSWORD,DOCKER_NAME
-
+          envs: KEYCLOAK_ADMIN,KEYCLOAK_ADMIN_PASSWORD
+          
           script: |
             set -e
 
             # ----------------------------------
             # Fix Docker image reference safely
             # ----------------------------------
-            DOCKER_IMAGE=${DOCKER_NAME}/ada502:latest
-
+            
+              DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
+            
             echo "Creating network..."
             sudo docker network create app-network || true
 
@@ -90,6 +91,8 @@ jobs:
             # ----------------------------------
             echo "Deploying API..."
 
+            DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
+
             sudo -E docker pull $DOCKER_IMAGE
 
             sudo -E docker run -d \
@@ -99,5 +102,3 @@ jobs:
               -e SERVER_URL=http://keycloak:8080/ \
               -e realm=ADA_502 \
               $DOCKER_IMAGE
-
-            echo "Deployment complete."
