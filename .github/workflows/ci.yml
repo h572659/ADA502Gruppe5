@@ -41,26 +41,23 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           port: ${{ secrets.VM_PORT }}
 
+          # These become $KEYCLOAK_ADMIN etc. on the VM
           envs: KEYCLOAK_ADMIN,KEYCLOAK_ADMIN_PASSWORD,DOCKER_NAME
 
           script: |
             set -e
 
             echo "Creating network..."
-            docker network create app-network || true
+            sudo docker network create app-network || true
 
             echo "Stopping old containers..."
-            docker stop keycloak || true
-            docker rm keycloak || true
-            docker stop ada502 || true
-            docker rm ada502 || true
+            sudo docker stop keycloak || true
+            sudo docker rm keycloak || true
+            sudo docker stop ada502 || true
+            sudo docker rm ada502 || true
 
-            # -------------------------
-            # START KEYCLOAK
-            # -------------------------
             echo "Starting Keycloak..."
-
-            docker run -d \
+            sudo docker run -d \
               --name keycloak \
               --network app-network \
               -p 8080:8080 \
@@ -76,16 +73,10 @@ jobs:
               sleep 5
             done
 
-            echo "Keycloak is ready."
-
-            # -------------------------
-            # START API
-            # -------------------------
             echo "Deploying API..."
+            sudo docker pull $DOCKER_NAME/ada502:latest
 
-            docker pull $DOCKER_NAME/ada502:latest
-
-            docker run -d \
+            sudo docker run -d \
               --name ada502 \
               --network app-network \
               -p 8000:8000 \
