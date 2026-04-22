@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from .auth import get_user_info, verify_user_role, verify_admin_role, oauth2_scheme
 from .indicator import indication
+from .met_service import fetch_fire_risk
 
 app = FastAPI(
     swagger_ui_init_oauth={
@@ -61,3 +62,20 @@ def risk(
 @app.get("/admin/only")
 def admin_only(admin: bool = Depends(verify_admin_role)):
     return {"message": "This endpoint is only accessible for admins."}
+
+@app.get("/user/fire-risk-db")
+def fire_risk_db(
+    city_id: int,
+    user: bool = Depends(verify_user_role),
+):
+    data = fetch_fire_risk(city_id)
+
+    if not data:
+        raise HTTPException(status_code=404, detail="No data found")
+
+    return {
+        "city_id": data[0],
+        "timestamp": data[1],
+        "ttf": data[2],
+        "wind_speed": data[3]
+    }
