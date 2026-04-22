@@ -39,7 +39,7 @@ def server_status():
         "message": "Server is running."
     }
 
-@app.get("/user/meta")
+@app.get("/user/met")
 def met(
     lat: float,
     lon: float,
