@@ -7,7 +7,7 @@ services:
       - "8000:8000"
     environment:
       API_KEY: ${API_KEY}
-      SERVER_URL: http://keycloak:8080/
+      SERVER_URL: http://158.37.66.185:8080/
       realm: ADA_502
     depends_on:
       - keycloak

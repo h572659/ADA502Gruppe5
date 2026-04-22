@@ -9,7 +9,7 @@ from .indicator import indication
 
 app = FastAPI(
     swagger_ui_init_oauth={
-        "clientId": "${KCLIENT_ID}", 
+        "clientId": "ada502_gruppe5", 
         "appName": "ADA_502 API",
         "usePkceWithAuthorizationCodeGrant": True
     }
