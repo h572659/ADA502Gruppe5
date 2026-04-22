@@ -34,10 +34,20 @@ jobs:
 
     steps:
       - name: Deploy to external VM
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT }}
+          source: "keycloak/import/*"
+          target: "/home/${{ secrets.VM_USER }}/keycloak-import"
+
+      - name: Deploy to external VM 
+        uses: appleboy/ssh-action@v0.1.7
+        with: 
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}  
           key: ${{ secrets.VM_SSH_KEY }}
           port: ${{ secrets.VM_PORT }}
 
@@ -56,32 +66,63 @@ jobs:
             echo "Stopping and cleaning up..."
             sudo docker stop keycloak ada502 || true
             sudo docker rm keycloak ada502 || true
+
+            echo "Creating import folder..."
+            mkdir -p /home/${{ secrets.VM_USER }}/keycloak-import
             
             echo "Ensuring network exists..."
             sudo docker network create app-network || true
 
+            echo "Ensuring volume exists..."
+            sudo docker volume create keycloak_data || true
+
             # 2. Start Keycloak - Minimalistisk versjon
-            # Vi fjerner import og volum-mapping helt for å sikre oppstart
             echo "Starting Keycloak..."
-            sudo -E docker run -d \
-              --name keycloak \
-              --network app-network \
-              -p 8080:8080 \
-              -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
-              -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
-              -e KC_HTTP_ENABLED=true \
-              -e KC_HOSTNAME_STRICT=false \
-              quay.io/keycloak/keycloak:26.1 \
-              start-dev
 
-            # 3. Vent litt på at Keycloak skal "puste"
-            echo "Giving Keycloak 15 seconds to start..."
-            sleep 15
+            if [ "$(sudo docker ps -aq -f name=keycloak)" ]; then
+              echo "Keycloak already exists - restarting..."
+              sudo docker start keycloak || true
+            else
+              echo "Creating Keycloak container..."
 
-            # 4. Start API-en din
+              sudo docker run -d \
+                --name keycloak \
+                --network app-network \
+                -p 8080:8080 \
+                -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
+                -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
+                -e KC_HTTP_ENABLED=true \
+                -e KC_HOSTNAME_STRICT=false \
+                -e KC_PROXY_HEADERS=xforwarded \
+                -v keycloak_data:/opt/keycloak/data \
+                -v /home/${{ secrets.VM_USER }}/keycloak-import:/opt/keycloak/data/import \
+                quay.io/keycloak/keycloak:26.1 \
+                start-dev --import-realm
+            fi
+
+            # ----------------------------------
+            # Wait for Keycloak
+            # ----------------------------------
+            echo "Waiting for Keycloak..."
+            for i in {1..20}; do
+              if curl -s http://localhost:8080 > /dev/null; then
+                echo "Keycloak is up!"
+                break
+              fi
+              sleep 5
+            done
+
+            echo "Keycloak logs:"
+            sudo docker logs keycloak --tail 50 || true
+
+            # ----------------------------------
+            # Deploy API
+            # ----------------------------------
             echo "Deploying API..."
-            sudo -E docker pull $DOCKER_IMAGE
-            sudo -E docker run -d \
+
+            sudo docker pull $DOCKER_IMAGE
+
+            sudo docker run -d \
               --name ada502 \
               --network app-network \
               -p 8000:8000 \
