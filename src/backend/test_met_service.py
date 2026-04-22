@@ -43,5 +43,5 @@ def make_mock_response(status=200, json_data=None, raise_exc=None):
             resp.raise_for_status.assert_called_once()
 
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     unittest.main()
