@@ -33,6 +33,11 @@ jobs:
     needs: test
 
     steps:
+      - name: Ensure realm file exists
+        run: |
+          mkdir -p keycloak-import
+          test -f keycloak-import/realm-export.json || echo '{}' > keycloak-import/realm-export.json
+
       - name: Deploy to external VM
         uses: appleboy/scp-action@v0.1.7
         with:
