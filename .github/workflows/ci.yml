@@ -33,6 +33,23 @@ jobs:
     needs: test
 
     steps:
+      # 1. Hent koden fra GitHub inn i runneren (viktig for å få tak i JSON-fila)
+      - name: Check out repository code
+        uses: actions/checkout@v5
+
+      # 2. Kopier JSON-fila fra GitHub-runneren til NREC-serveren
+      - name: Copy Keycloak Realm JSON to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          port: ${{ secrets.VM_PORT }}
+          source: "src/backend/keycloak/import/ADA_502-realm.json"
+          target: "~/keycloak/import"
+          strip_components: 4 # Dette fjerner "src/backend/keycloak/import/" fra stien på målet
+
+      # 3. Kjør de vanlige kommandoene via SSH
       - name: Deploy to external VM
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -40,33 +57,20 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           port: ${{ secrets.VM_PORT }}
-
-          # Inject GitHub secrets into SSH environment
           envs: KEYCLOAK_ADMIN,KEYCLOAK_ADMIN_PASSWORD
-          
           script: |
             set -e
-
-            # ----------------------------------
-            # Fix Docker image reference safely
-            # ----------------------------------
+            DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
             
-              DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
-            
-            echo "Creating network..."
-            sudo docker network create app-network || true
-
-            echo "Stopping old containers..."
-            sudo docker stop keycloak || true
-            sudo docker rm keycloak || true
-            sudo docker stop ada502 || true
-            sudo docker rm ada502 || true
-            echo "Removing old Keycloak data..."
+            echo "Cleaning up..."
+            sudo docker stop keycloak ada502 || true
+            sudo docker rm keycloak ada502 || true
             sudo docker volume rm keycloak_data || true
             sudo docker network create app-network || true
-            # ----------------------------------
-            # Start Keycloak
-            # ----------------------------------
+
+            # Opprett mappen på NREC hvis den ikke finnes (just in case)
+            mkdir -p ~/keycloak/import
+
             echo "Starting Keycloak..."
             sudo -E docker run -d \
               --name keycloak \
@@ -74,36 +78,35 @@ jobs:
               -p 8080:8080 \
               -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
               -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
+              -e KC_HOSTNAME=${{ secrets.VM_HOST }} \
               -e KC_HTTP_ENABLED=true \
               -e KC_HOSTNAME_STRICT=false \
               -e KC_HOSTNAME_STRICT_HTTPS=false \
+              -v keycloak_data:/opt/keycloak/data \
               -v ~/keycloak/import:/opt/keycloak/data/import \
               quay.io/keycloak/keycloak:26.1 \
               start-dev --import-realm
 
-            # ----------------------------------
-            # Proper readiness check
-            # ----------------------------------
             echo "Waiting for Keycloak..."
-            until curl -s http://localhost:8080/realms/master > /dev/null; do
+            for i in {1..25}; do
+              if curl -s http://localhost:8080/health/live > /dev/null; then
+                echo "Keycloak is up!"
+                break
+              fi
+              if [ $i -eq 25 ]; then
+                echo "Keycloak failed. Logs:"
+                sudo docker logs keycloak
+                exit 1
+              fi
               sleep 5
             done
 
-            echo "Keycloak is ready."
-
-            # ----------------------------------
-            # Deploy API
-            # ----------------------------------
             echo "Deploying API..."
-
-            DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
-
             sudo -E docker pull $DOCKER_IMAGE
-
             sudo -E docker run -d \
               --name ada502 \
               --network app-network \
               -p 8000:8000 \
-              -e SERVER_URL=http://keycloak:8080/ \
+              -e SERVER_URL=http://keycloak:8080 \
               -e realm=ADA_502 \
               $DOCKER_IMAGE
