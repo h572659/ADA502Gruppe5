@@ -45,43 +45,43 @@ jobs:
           envs: KEYCLOAK_ADMIN,KEYCLOAK_ADMIN_PASSWORD,DOCKER_NAME
 
           script: |
-            set -e
+              set -e
 
-            echo "Creating network..."
-            sudo docker network create app-network || true
+              echo "Creating network..."
+              sudo docker network create app-network || true
 
-            echo "Stopping old containers..."
-            sudo docker stop keycloak || true
-            sudo docker rm keycloak || true
-            sudo docker stop ada502 || true
-            sudo docker rm ada502 || true
+              echo "Stopping old containers..."
+              sudo docker stop keycloak || true
+              sudo docker rm keycloak || true
+              sudo docker stop ada502 || true
+              sudo docker rm ada502 || true
 
-            echo "Starting Keycloak..."
-            sudo docker run -d \
-              --name keycloak \
-              --network app-network \
-              -p 8080:8080 \
-              -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
-              -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
-              -e KC_HEALTH_ENABLED=true \
-              -v ~/keycloak/import:/opt/keycloak/data/import \
-              quay.io/keycloak/keycloak:26.1 \
-              start-dev --import-realm
+              echo "Starting Keycloak..."
+              sudo -E docker run -d \
+                --name keycloak \
+                --network app-network \
+                -p 8080:8080 \
+                -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
+                -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
+                -v ~/keycloak/import:/opt/keycloak/data/import \
+                quay.io/keycloak/keycloak:26.1 \
+                start-dev --import-realm
 
-            echo "Waiting for Keycloak..."
-            until curl -s http://localhost:8080/health/ready; do
-              sleep 5
-            done
+              echo "Waiting for Keycloak..."
+              until curl -s http://localhost:8080/; do
+                sleep 5
+              done
 
-            echo "Deploying API..."
-            sudo docker pull $DOCKER_NAME/ada502:latest
+              echo "Deploying API..."
 
-            sudo docker run -d \
-              --name ada502 \
-              --network app-network \
-              -p 8000:8000 \
-              -e SERVER_URL=http://keycloak:8080/ \
-              -e realm=ADA_502 \
-              $DOCKER_NAME/ada502:latest
+              sudo -E docker pull ${DOCKER_NAME}/ada502:latest
 
-            echo "Deployment complete."
+              sudo -E docker run -d \
+                --name ada502 \
+                --network app-network \
+                -p 8000:8000 \
+                -e SERVER_URL=http://keycloak:8080/ \
+                -e realm=ADA_502 \
+                ${DOCKER_NAME}/ada502:latest
+
+              echo "Deployment complete."
