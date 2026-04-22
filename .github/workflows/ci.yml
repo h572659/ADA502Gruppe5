@@ -9,13 +9,19 @@ jobs:
           uses: actions/checkout@v5
         - name: Install uv
           uses: astral-sh/setup-uv@v7
+        - run: uv run python src/backend/test_met_service.py
+          name: Runs unit test
+        - run: uv run python src/backend/test_METHarvest.py
+          name: Runs unit test
+        - run: uv run python src/backend/test_indicator.py
+          name: Runs unit test
         #- run: uv run python src/backend/test_met_service.py
           #name: Runs unit test
         #- run: uv run python src/backend/test_METHarvest.py
           #name: Runs unit test
         #- run: uv run python src/backend/test_indicator.py
           #name: Runs unit test
-        
+
         - name: Login to Docker Hub
           uses: docker/login-action@v4
           with:
@@ -27,54 +33,44 @@ jobs:
 
         - name: Push image
           run: docker push ${{ secrets.DOCKER_NAME }}/ada502:latest
-          
+
   deploy:
     runs-on: ubuntu-latest
     needs: test
+
     steps:
-      - name: Check out repository code
-        uses: actions/checkout@v5
-
-      # Dette steget sørger for at mappen finnes på NREC før vi sender fila
-      - name: Create import directory on VM
+      - name: Deploy to external VM
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           port: ${{ secrets.VM_PORT }}
-          script: mkdir -p ~/keycloak/import
 
-      # Send JSON-fila fra GitHub til NREC
-      - name: Copy Keycloak Realm JSON to VM
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          port: ${{ secrets.VM_PORT }}
-          source: "src/backend/keycloak/import/ADA_502-realm.json"
-          target: "~/keycloak/import"
-          strip_components: 4 
-
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.VM_HOST }}
-          username: ${{ secrets.VM_USER }}
-          key: ${{ secrets.VM_SSH_KEY }}
-          port: ${{ secrets.VM_PORT }}
+          # Inject GitHub secrets into SSH environment
           envs: KEYCLOAK_ADMIN,KEYCLOAK_ADMIN_PASSWORD
+
           script: |
             set -e
-            DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
 
-            echo "Cleaning up old containers and volumes..."
-            sudo docker stop keycloak ada502 || true
-            sudo docker rm keycloak ada502 || true
-            sudo docker volume rm keycloak_data || true
+            # ----------------------------------
+            # Fix Docker image reference safely
+            # ----------------------------------
+            
+              DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
+            
+            echo "Creating network..."
             sudo docker network create app-network || true
 
+            echo "Stopping old containers..."
+            sudo docker stop keycloak || true
+            sudo docker rm keycloak || true
+            sudo docker stop ada502 || true
+            sudo docker rm ada502 || true
+
+            # ----------------------------------
+            # Start Keycloak
+            # ----------------------------------
             echo "Starting Keycloak..."
             sudo -E docker run -d \
               --name keycloak \
@@ -82,31 +78,35 @@ jobs:
               -p 8080:8080 \
               -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
               -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
-              -e KC_HOSTNAME=${{ secrets.VM_HOST }} \
               -e KC_HTTP_ENABLED=true \
               -e KC_HOSTNAME_STRICT=false \
               -e KC_HOSTNAME_STRICT_HTTPS=false \
-              -v keycloak_data:/opt/keycloak/data \
               -v ~/keycloak/import:/opt/keycloak/data/import \
               quay.io/keycloak/keycloak:26.1 \
               start-dev --import-realm
 
-            echo "Waiting for Keycloak healthcheck..."
-            for i in {1..30}; do
-              if curl -s http://localhost:8080/health/live > /dev/null; then
-                echo "Keycloak is up!"
-                break
-              fi
-              echo "Waiting... ($i)"
+            # ----------------------------------
+            # Proper readiness check
+            # ----------------------------------
+            echo "Waiting for Keycloak..."
+            until curl -s http://localhost:8080/realms/master > /dev/null; do
               sleep 5
             done
 
+            echo "Keycloak is ready."
+
+            # ----------------------------------
+            # Deploy API
+            # ----------------------------------
             echo "Deploying API..."
+
+            DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
+
             sudo -E docker pull $DOCKER_IMAGE
+
             sudo -E docker run -d \
               --name ada502 \
               --network app-network \
               -p 8000:8000 \
-              -e SERVER_URL=http://keycloak:8080 \
+              -e SERVER_URL=http://keycloak:8080/ \
               -e realm=ADA_502 \
-              $DOCKER_IMAGE
