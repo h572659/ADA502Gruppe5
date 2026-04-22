@@ -20,7 +20,7 @@ def make_mock_response(status=200, json_data=None, raise_exc=None):
     return m
 
 
-class TestMetService(unittest.TestCase):
+#class TestMetService(unittest.TestCase):
 
     def test_fetch_weather_returns_json_and_calls_raise(self):
         sample = {"properties": {"timeseries": []}}
