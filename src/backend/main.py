@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Header, HTTPException, status, Depends
 import os
-from met_service import fetch_weather
+from .met_service import fetch_weather
 from .frcm_service import calculate_fire_risk
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from .auth import get_user_info, verify_user_role, verify_admin_role, oauth2_scheme
 from .indicator import indication
-from met_service import fetch_fire_risk
+from .met_service import fetch_fire_risk
 
 
 app = FastAPI(
