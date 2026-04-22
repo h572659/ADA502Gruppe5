@@ -61,7 +61,9 @@ jobs:
             sudo docker rm keycloak || true
             sudo docker stop ada502 || true
             sudo docker rm ada502 || true
-
+            echo "Removing old Keycloak data..."
+            sudo docker volume rm keycloak_data || true
+            sudo docker network create app-network || true
             # ----------------------------------
             # Start Keycloak
             # ----------------------------------
