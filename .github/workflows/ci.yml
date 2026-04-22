@@ -84,26 +84,25 @@ jobs:
             # 2. Start Keycloak - Minimalistisk versjon
             echo "Starting Keycloak..."
 
-            if [ "$(sudo docker ps -aq -f name=keycloak)" ]; then
-              echo "Keycloak already exists - restarting..."
-              sudo docker start keycloak || true
-            else
-              echo "Creating Keycloak container..."
+            echo "Recreating Keycloak container (clean state)..."
 
-              sudo docker run -d \
-                --name keycloak \
-                --network app-network \
-                -p 8080:8080 \
-                -e KEYCLOAK_ADMIN=$KEYCLOAK_ADMIN \
-                -e KEYCLOAK_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
-                -e KC_HTTP_ENABLED=true \
-                -e KC_HOSTNAME_STRICT=false \
-                -e KC_PROXY_HEADERS=xforwarded \
-                -v keycloak_data:/opt/keycloak/data \
-                -v /home/${{ secrets.VM_USER }}/keycloak-import:/opt/keycloak/data/import \
-                quay.io/keycloak/keycloak:26.1 \
-                start-dev --import-realm
-            fi
+            sudo docker rm -f keycloak || true
+
+
+            sudo docker run -d \
+            --name keycloak \
+              --restart unless-stopped \
+            --network app-network \
+            -p 8080:8080 \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=$KEYCLOAK_ADMIN \
+            -e KC_BOOTSTRAP_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
+            -e KC_HTTP_ENABLED=true \
+            -e KC_HOSTNAME_STRICT=false \
+            -e KC_PROXY_HEADERS=xforwarded \
+            -v keycloak_data:/opt/keycloak/data \
+            -v /home/${{ secrets.VM_USER }}/keycloak-import:/opt/keycloak/data/import \
+            quay.io/keycloak/keycloak:26.1 \
+            start-dev --import-realm
 
             # ----------------------------------
             # Wait for Keycloak
