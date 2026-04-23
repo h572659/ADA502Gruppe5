@@ -110,7 +110,9 @@ jobs:
                 -e KC_BOOTSTRAP_ADMIN_USERNAME="${KEYCLOAK_ADMIN}" \
                 -e KC_BOOTSTRAP_ADMIN_PASSWORD="${KEYCLOAK_ADMIN_PASSWORD}" \
                 -e KC_HTTP_ENABLED=true \
+                -e KC_HOSTNAME=158.37.66.185 \
                 -e KC_HOSTNAME_STRICT=false \
+                -e KC_HOSTNAME_STRICT_HTTPS=false \
                 -e KC_PROXY_HEADERS=xforwarded \
                 -v keycloak_data:/opt/keycloak/data \
                 -v /home/${{ secrets.VM_USER }}/keycloak-import:/opt/keycloak/data/import \
