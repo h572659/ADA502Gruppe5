@@ -86,23 +86,34 @@ jobs:
 
             echo "Recreating Keycloak container (clean state)..."
 
-            sudo docker rm -f keycloak || true
+            echo "Starting Keycloak (smart mode)..."
 
+              # Check if DB already exists
+              if [ "$(sudo docker volume ls -q | grep keycloak_data)" ]; then
+                echo "Existing database found → starting WITHOUT import"
+                KC_CMD="start-dev"
+              else
+                echo "No database found → importing realm"
+                KC_CMD="start-dev --import-realm"
+              fi
 
-            sudo docker run -d \
-            --name keycloak \
-              --restart unless-stopped \
-            --network app-network \
-            -p 8080:8080 \
-            -e KC_BOOTSTRAP_ADMIN_USERNAME=$KEYCLOAK_ADMIN \
-            -e KC_BOOTSTRAP_ADMIN_PASSWORD=$KEYCLOAK_ADMIN_PASSWORD \
-            -e KC_HTTP_ENABLED=true \
-            -e KC_HOSTNAME_STRICT=false \
-            -e KC_PROXY_HEADERS=xforwarded \
-            -v keycloak_data:/opt/keycloak/data \
-            -v /home/${{ secrets.VM_USER }}/keycloak-import:/opt/keycloak/data/import \
-            quay.io/keycloak/keycloak:26.1 \
-            start-dev --import-realm
+              # Always recreate container (safe)
+              sudo docker rm -f keycloak || true
+
+              sudo docker run -d \
+                --name keycloak \
+                --network app-network \
+                -p 8080:8080 \
+                --restart unless-stopped \
+                -e KC_BOOTSTRAP_ADMIN_USERNAME="${KEYCLOAK_ADMIN}" \
+                -e KC_BOOTSTRAP_ADMIN_PASSWORD="${KEYCLOAK_ADMIN_PASSWORD}" \
+                -e KC_HTTP_ENABLED=true \
+                -e KC_HOSTNAME_STRICT=false \
+                -e KC_PROXY_HEADERS=xforwarded \
+                -v keycloak_data:/opt/keycloak/data \
+                -v /home/${{ secrets.VM_USER }}/keycloak-import:/opt/keycloak/data/import \
+                quay.io/keycloak/keycloak:26.1 \
+                $KC_CMD
 
             # ----------------------------------
             # Wait for Keycloak
