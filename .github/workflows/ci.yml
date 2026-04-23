@@ -56,10 +56,16 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           port: ${{ secrets.VM_PORT }}
 
-          # Inject GitHub secrets into SSH environment
-          envs: KEYCLOAK_ADMIN,KEYCLOAK_ADMIN_PASSWORD
+          
 
           script: |
+
+            export KEYCLOAK_ADMIN="${{ secrets.KEYCLOAK_ADMIN }}"
+            export KEYCLOAK_ADMIN_PASSWORD="${{ secrets.KEYCLOAK_ADMIN_PASSWORD }}"
+
+            echo "User: $KEYCLOAK_ADMIN"
+            echo "Password length: ${#KEYCLOAK_ADMIN_PASSWORD}"
+
             set -e
 
             # ----------------------------------
@@ -67,10 +73,6 @@ jobs:
             # ----------------------------------
             
             DOCKER_IMAGE=${{ secrets.DOCKER_NAME }}/ada502:latest
-            
-            echo "Stopping and cleaning up..."
-            sudo docker stop keycloak ada502 || true
-            sudo docker rm keycloak ada502 || true
 
             echo "Creating import folder..."
             mkdir -p /home/${{ secrets.VM_USER }}/keycloak-import
@@ -89,16 +91,16 @@ jobs:
             echo "Starting Keycloak (smart mode)..."
 
               # Check if DB already exists
-              if [ "$(sudo docker volume ls -q | grep keycloak_data)" ]; then
-                echo "Existing database found → starting WITHOUT import"
-                KC_CMD="start-dev"
-              else
-                echo "No database found → importing realm"
+              if sudo docker run --rm -v keycloak_data:/data busybox sh -c "[ -z \"$(ls -A /data)\" ]"; then
+                echo "Empty database → importing realm"
                 KC_CMD="start-dev --import-realm"
+              else
+                echo "Existing database → normal start"
+                KC_CMD="start-dev"
               fi
 
               # Always recreate container (safe)
-              sudo docker rm -f keycloak || true
+              sudo docker rm -f keycloak ada502 || true
 
               sudo docker run -d \
                 --name keycloak \
