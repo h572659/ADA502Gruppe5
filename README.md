@@ -53,19 +53,25 @@ The application can be easily extended by adding more cities or locations to thi
 
 This final table is not currently in use but is intended to store login information in the future.
 
-## Problems and missing parts
+## Problems and Missing Parts
 
 ### Keycloak
 Keycloak is currently not working on our landing page. You get contact to it when using the school network but then you get a missing https error, so we have chosen to remove it for now. They keycloak service doesnt have persistence yet so any new users and changes in the realm has to be exported manually. The keycloak part does work when locally hosting.
 
-### The front page
-A dedicated frontend has not yet been implemented. As a result, the application currently relies on basic endpoints (Swagger UI), making it less user-friendly and not visually appealing. 
+### The Front-End
+A dedicated front-end has not yet been implemented. As a result, the application currently relies on basic endpoints (Swagger UI), making it less user-friendly and not visually appealing. The lack of a front-end application also means that the broker has no subscribers. 
 
-### The FRCM part
-In the API the FRCM part only collects the data from our database where we have only calculated for three locations. Its also unclear what locations you are requesting from because we use numbers 1-3. Where 1 is Oslo, 2 is Bergen and 3 is Trondheim. Its not userfriendly at its current stage.
+### The FRCM Part
+In the API the FRCM part collects the data from our database where we have only calculated for three locations. It's also unclear what locations you are requesting  because we use the ids. Currently 1 is Oslo, 2 is Bergen and 3 is Trondheim. Its not userfriendly in its current state. 
+
+
 
 ### CI/CD
-The CI/CD part works well but the tests in the CI part is barely existing.
+The CI/CD part works well enough but the tests in the CI part are somewhat lacking.
+
+### Legacy Code
+
+The project has gone through some changes in desing and scope, and the consequence is that there might be some room for refactoring. 
 
 ## Landing page
 http://158.37.66.185:8000/
