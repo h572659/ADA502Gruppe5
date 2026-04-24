@@ -104,14 +104,13 @@ jobs:
               sudo docker run -d \
                 --name keycloak \
                 --network app-network \
-                -p 8001:8080 \
+                -p 8080:8080 \
                 --restart unless-stopped \
                 -e KC_BOOTSTRAP_ADMIN_USERNAME="${KEYCLOAK_ADMIN}" \
                 -e KC_BOOTSTRAP_ADMIN_PASSWORD="${KEYCLOAK_ADMIN_PASSWORD}" \
                 -e KC_HTTP_ENABLED=true \
                 -e KC_HOSTNAME=158.37.66.185 \
-                -e KC_HOSTNAME_PORT=8001 \
-                -e KC_PROXY=edge \
+                -e KC_HOSTNAME_PORT=8080 \
                 -e KC_HOSTNAME_STRICT=false \
                 -e KC_HOSTNAME_STRICT_HTTPS=false \
                 -e KC_PROXY_HEADERS=xforwarded \
@@ -125,7 +124,7 @@ jobs:
             # ----------------------------------
             echo "Waiting for Keycloak..."
             for i in {1..20}; do
-              if curl -s http://localhost:8001 > /dev/null; then
+              if curl -s http://localhost:8080 > /dev/null; then
                 echo "Keycloak is up!"
                 break
               fi
