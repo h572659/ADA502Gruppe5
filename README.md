@@ -13,7 +13,7 @@ The project aims to support firefighters in making informed decisions about reso
 
 ## Structure
 
-![Visual explanation](images\project.png)
+![Visual explanation](/images/project.png)
 
 
 The application is designed as follows:
