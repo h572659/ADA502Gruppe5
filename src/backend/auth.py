@@ -6,15 +6,15 @@ from .models import User
 
 
 oauth2_scheme = OAuth2AuthorizationCodeBearer(
-    authorizationUrl=("http://158.37.66.185:8080/realms/ADA_502/protocol/openid-connect/auth"
+#authorizationUrl=("http://158.37.66.185:8080/realms/ADA_502/protocol/openid-connect/auth"
+  #                    "?prompt=login"),
+    
+    authorizationUrl=("http://localhost:8080/realms/ADA_502/protocol/openid-connect/auth"
                       "?prompt=login"),
     
-    #authorizationUrl=("http://localhost:8080/realms/ADA_502/protocol/openid-connect/auth"
-                      #"?prompt=login"),
-    
-    tokenUrl="http://158.37.66.185:8080/realms/ADA_502/protocol/openid-connect/token"
+   # tokenUrl="http://158.37.66.185:8080/realms/ADA_502/protocol/openid-connect/token"
   
-    #tokenUrl="http://localhost:8080/realms/ADA_502/protocol/openid-connect/token"
+    tokenUrl="http://localhost:8080/realms/ADA_502/protocol/openid-connect/token"
 )
 
 ROLE_HIERARCHY = {

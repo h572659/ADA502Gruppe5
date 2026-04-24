@@ -1,12 +1,11 @@
 from fastapi import FastAPI, Header, HTTPException, status, Depends
 import os
-from .met_service import fetch_weather
-from .frcm_service import calculate_fire_risk
+from .fetch_service import fetch_weather
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from .auth import get_user_info, verify_user_role, verify_admin_role, oauth2_scheme
 from .indicator import indication
-from .met_service import fetch_fire_risk
+from .fetch_service import fetch_fire_risk
 
 
 app = FastAPI(
@@ -47,18 +46,6 @@ def met(
 ):
     return {**fetch_weather(lat, lon).json(), "message": "Weather data collected for users and admins."}
 
-@app.get("/user/risk")
-def risk(
-    lat: float,
-    lon: float,
-    #user: bool = Depends(verify_user_role),
-):
-    met_json = fetch_weather(lat, lon).json()
-    result = calculate_fire_risk(met_json)
-    temperature = result.get("air_temperature")
-    if temperature is not None:
-        result["indication"] = indication(temperature)
-    return {"lat": lat, "lon": lon, "frcm_result": result}
 
 @app.get("/admin/only")
 def admin_only(admin: bool = Depends(verify_admin_role)):
