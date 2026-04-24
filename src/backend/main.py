@@ -62,7 +62,7 @@ def risk(
 
 @app.get("/admin/only")
 def admin_only(admin: bool = Depends(verify_admin_role)):
-    return {"message": "This endpoint is only accessible for admins."}
+    return {"message": "Something only admins should see. Very secret."}
 
 
 @app.get("/user/fire-risk-db")
