@@ -16,12 +16,6 @@ app = FastAPI(
     }
 )
 app.swagger_ui_oauth2_redirect_url = "/docs/oauth2-redirect"
-API_KEY = os.getenv("API_KEY", "superhemmelig")
-
-def require_api_key(x_api_key: str | None):
-    if x_api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
 
 app.mount("/static-docs", StaticFiles(directory="/app/web-docs/site", html=True), name="static-docs")
 
@@ -66,5 +60,6 @@ def fire_risk_db(
         "city_id": data[0],
         "timestamp": data[1],
         "ttf": data[2],
-        "wind_speed": data[3]
+        "wind_speed": data[3],
+        "danger_level": indication(data[2])
     }
