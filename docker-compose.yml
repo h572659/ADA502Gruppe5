@@ -18,12 +18,13 @@ services:
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-      KC_HOSTNAME: 158.37.66.185
+      KC_HOSTNAME: 158.37.66.185:8001
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
       KC_PROXY_HEADERS: xforwarded
+      KC_Proxy: edge
     ports:
-      - "8080:8080"
+      - "8001:8080"
     volumes:
       - ./keycloak/import:/opt/keycloak/data/import
       - keycloak_data:/opt/keycloak/data
