@@ -1,0 +1,50 @@
+{
+  "realm" : "ADA_502",
+  "users" : [ {
+    "id" : "ebe135f4-9a98-4801-b13d-56552e3ad3be",
+    "username" : "user1",
+    "firstName" : "User1",
+    "lastName" : "User1_lastname",
+    "email" : "user1@gmail.com",
+    "emailVerified" : false,
+    "createdTimestamp" : 1774564284001,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "d68386aa-0808-46dc-b622-ee1c0c4709da",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1774564299519,
+      "secretData" : "{\"value\":\"dgU/M0TpBGC1xpersLkCxu1uXKj+eyw0SPgQ2aO6JEs=\",\"salt\":\"C1UaB/eq0MYzsF8sSr0bnw==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "admin", "default-roles-ada_502" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "1e8a30cc-05cb-4d6c-9382-eb660f264e06",
+    "username" : "user2",
+    "firstName" : "User2",
+    "lastName" : "User2_lastname",
+    "email" : "user2@gmail.com",
+    "emailVerified" : false,
+    "createdTimestamp" : 1774564360894,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "0a80c3b5-b27b-46b9-8872-52668f2624ad",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1774564376199,
+      "secretData" : "{\"value\":\"r5CVooMagTnb8AFZKvA/wOuiKODXtQk34XQyzl23bEc=\",\"salt\":\"gx3RknKUkZL2lIVCznBEwQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":5,\"algorithm\":\"argon2\",\"additionalParameters\":{\"hashLength\":[\"32\"],\"memory\":[\"7168\"],\"type\":[\"id\"],\"version\":[\"1.3\"],\"parallelism\":[\"1\"]}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "user", "default-roles-ada_502" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}
