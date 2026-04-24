@@ -1,37 +1,77 @@
 # ADA502Gruppe5
 
-## Trello
-https://trello.com/b/juFPn2S1/ada502gruppe5
+## Introduction
+
+
+This repository contains one of the two components of our prototype fire risk application, developed for the ADA502 - Cloud Computing course at HVL. The project uses data collected by the [meterologisk Institutt](https://www.met.no/)
+ to assess fire risks in specific geographic locations. To perform these calculations, we utilize the [dynamic FRCM](https://pypi.org/project/dynamic-frcm/), which is based on a research paper.
+
+
+## Vision
+
+The project aims to support firefighters in making informed decisions about resource allocation. By redirecting personnel from areas with low fire risk to areas with high fire risk, the application seeks to improve efficiency and reduce fire-related losses.
+
+## Structure
+
+![Visual explanation](images\project.png)
+
+
+The application is designed as follows:
+
+1. Data Collection: One component gathers data from the Meteorologisk Institutt (MET)
+
+2. Calculation & Storage: This component performs fire risk calculations and stores the results in a relational database.
+3. Publishing Updates: Calculated fire risk data is also sent to a broker, which provides hourly updates to subscribers.
+4. Front-End Behavior: To accommodate users who may not want the application running continuously, the front-end reads the most recent fire risk data from the database on startup before connecting to the broker for live updates.
+
+This forms the minimum viable concept of the application. Future development could allow users to view predictions for upcoming periods and review historical trends
+
+## Some Comments on Our Database
+
+Our current relational database contains three tables: users, city, and fire_risk.
+
+1. city
+
+- id: Primary key
+- name: Name of the city
+- latitude, 
+- longitude: Spatial coordinates
+
+The application can be easily extended by adding more cities or locations to this table.
+
+2. fire_risk
+
+- id: Primary key
+- city_id: Foreign key linking to the city table
+- timestamp: Timestamp provided by MET (in UTC)
+- ttf: Fire risk value
+- wind_speed: Wind speed value provided by MET
+- is_forecast: Boolean indicating whether this is a prediction (true) or historical data (false)
+- created_at: Timestamp when the calculation was added to the database
+
+3. users
+
+This final table is not currently in use but is intended to store login information in the future.
 
 ## Landing page
-http://158.37.66.185/
+http://158.37.66.185:8000/
 
-## How to update the documentation website (in the future)
-Step 1: Make changes to index.md in the "docs" folder in the "web-docs" folder.
+This is the landing page for the current project where you should be able to check out the current state of the project. 
 
-
-Step 2: Use cd to move from project root to web-docs -> "cd web-docs"
-
-
-Step 3: Build the webpage -> "mkdocs build" (Command must be used in the web-docs folder)
-
-
-### NOTE: You can also make direct changes to the index.html file obviously, in that case skip steps 1-3.
-
-
-Step 4: Check that your changes have been added. Run the docker-compose file and test on localhost:8000 to see changes.
-
-
-Step 5: Push changes to the repository, hopefully there will soon be an automatic CD pipeline up and running.
-
-
-Step 6: Test the landing page using the above url.
-
-
-https://www.mkdocs.org/getting-started/
 
 ## MQWorkerService
 https://github.com/h572659/MQWorkerService
+
+
+This component is responsible for fetching data from the Meteorologisk Institutt (MET)
+ once an hour. The data is processed using the dynamic FRCM library to calculate fire risk.
+
+The results are:
+
+Stored in the relational database for retrieval through the API component.
+Sent to RabbitMQ, which provides updates to subscribers (e.g., the front-end application).
+
+This service forms the automated backend of the system, ensuring that fire risk data is regularly updated and distributed.
 
 ## To host locally
 Because of troubles we have had with keycloak (kc) and https the kc logic is mostly commented out, but if it is run locally it should work.
