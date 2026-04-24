@@ -43,7 +43,7 @@ def server_status():
 def met(
     lat: float,
     lon: float,
-    user: bool = Depends(verify_user_role),
+    #user: bool = Depends(verify_user_role),
 ):
     return {**fetch_weather(lat, lon).json(), "message": "Weather data collected for users and admins."}
 
@@ -51,7 +51,7 @@ def met(
 def risk(
     lat: float,
     lon: float,
-    user: bool = Depends(verify_user_role),
+    #user: bool = Depends(verify_user_role),
 ):
     met_json = fetch_weather(lat, lon).json()
     result = calculate_fire_risk(met_json)
@@ -68,7 +68,7 @@ def admin_only(admin: bool = Depends(verify_admin_role)):
 @app.get("/user/fire-risk-db")
 def fire_risk_db(
     city_id: int,
-    user: bool = Depends(verify_user_role),
+    #user: bool = Depends(verify_user_role),
 ):
     data = fetch_fire_risk(city_id)
 
